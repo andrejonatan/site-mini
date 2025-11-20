@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Site Mini - Andrejonatan</title>
+<style>
+  :root{
+    --bg-overlay: rgba(10,25,47,0.85);
+    --panel-bg: rgba(17,34,64,0.9);
+    --glass: rgba(255,255,255,0.06);
+    --accent: #3b82f6;
+    --text: #f5f5f5;
+    --card-radius: 16px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color:var(--text);
+    /* USING THE LOCAL FILE PATH YOU UPLOADED */
+    background: linear-gradient(var(--bg-overlay), var(--bg-overlay)),
+        url("https://th.bing.com/th/id/OIP.gM8pAqwLZTQ1VykZtyzlnAHaEK?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3")
+        no-repeat center center fixed;
+    background-size: cover;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:40px 20px;
+  }
+
+  .shell{
+    width:92%;
+    max-width:1100px;
+    background: var(--panel-bg);
+    border-radius:18px;
+    padding:28px;
+    box-shadow:0 12px 40px rgba(0,0,0,0.45);
+    backdrop-filter: blur(6px);
+  }
+
+  header{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin-bottom:18px;
+  }
+  header img{ width:84px; height:84px; border-radius:12px; object-fit:cover; box-shadow:0 6px 18px rgba(0,0,0,0.45); border:2px solid rgba(255,255,255,0.04)}
+  header h1{ font-size:22px; margin:0; font-weight:700; color:#fff }
+
+  .controls{
+    display:flex;
+    gap:12px;
+    margin:18px 0;
+    flex-wrap:wrap;
+  }
+  .controls .search{
+    flex:1;
+    min-width:220px;
+    padding:10px 14px;
+    border-radius:10px;
+    border:none;
+    background: rgba(255,255,255,0.06);
+    color:var(--text);
+  }
+  .controls button{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:10px 14px;
+    border-radius:10px;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+    gap:18px;
+    margin-top:10px;
+  }
+
+  .card{
+    background:var(--glass);
+    border-radius:var(--card-radius);
+    padding:16px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.35);
+    backdrop-filter: blur(8px);
+    transition:transform .18s, box-shadow .18s;
+    min-height:120px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
+  .card:hover{ transform: translateY(-6px); box-shadow:0 18px 40px rgba(0,0,0,0.45) }
+
+  .card h3{ margin:0 0 6px 0; font-size:16px; font-weight:700; color:#fff; word-break:break-word }
+  .card p { margin:0; color:#cbd5e1; font-size:13px; word-break:break-all }
+  .card .meta { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px }
+  .chip { background: rgba(59,130,246,0.18); color:#eaf2ff; padding:6px 10px; border-radius:999px; font-size:12px; }
+
+  .card .actions{ display:flex; gap:10px; margin-top:12px; }
+  .btn-open{ background: #2563eb; color:white; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:700; }
+  .btn-open:hover{ background:#1d4ed8 }
+
+  .footer { text-align:center; color:#9aa6bf; margin-top:16px; font-size:13px }
+  @media (max-width:720px){ .shell{ padding:16px } header img{ width:72px; height:72px } }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <img src="https://media.tenor.com/7mSj4FRRZP0AAAAM/kiyotaka-ayanokoji-eyes.gif" alt="profile"/>
+      <div>
+        <h1>Site Mini — Andrejonatan</h1>
+        <div style="color:#cbd5e1; font-size:13px; margin-top:6px">Auto-generated index of folders in <code>site-mini</code></div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <input id="search" class="search" placeholder="Cari nama folder..." />
+      <button id="refresh">Refresh</button>
+    </div>
+
+    <div id="grid" class="grid" aria-live="polite"></div>
+
+    <div class="footer">Auto-generated using GitHub Contents API — public repo</div>
+  </div>
+
+<script>
+const owner = "andrejonatan";
+const repo = "site-mini";
+
+const gridEl = document.getElementById("grid");
+const searchEl = document.getElementById("search");
+const refreshBtn = document.getElementById("refresh");
+
+async function fetchContents(path=""){
+  const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const res = await fetch(api);
+  if(!res.ok) throw new Error('GitHub API error: '+res.status);
+  return res.json();
+}
+
+// build list of folders at root and optionally check for index.html inside
+async function buildIndex(){
+  gridEl.innerHTML = `<div style="grid-column:1/-1;color:#cbd5e1">Loading site…</div>`;
+  try {
+    const contents = await fetchContents("");
+    // filter directories only
+    const dirs = (contents || []).filter(item => item.type === "dir");
+
+    // map into objects with name + hasIndex flag
+    const results = await Promise.all(dirs.map(async d => {
+      // check if index.html exists inside that folder
+      let hasIndex = false;
+      try {
+        const inside = await fetchContents(encodeURIComponent(d.path));
+        hasIndex = inside.some(f => f.name.toLowerCase() === "index.html");
+      } catch(e){
+        hasIndex = false;
+      }
+      return { name: d.name, path: d.path, hasIndex };
+    }));
+
+    renderGrid(results);
+  } catch(err){
+    console.error(err);
+    gridEl.innerHTML = `<div style="grid-column:1/-1;color:#fca5a5">Failed to load repo contents. Check console (CORS/GitHub rate limit).</div>`;
+  }
+}
+
+function renderGrid(items){
+  const q = (searchEl.value || "").toLowerCase().trim();
+
+  const filtered = items.filter(it => it.name.toLowerCase().includes(q));
+
+  if(filtered.length === 0){
+    gridEl.innerHTML = `<div style="grid-column:1/-1;color:#cbd5e1">No site found.</div>`;
+    return;
+  }
+
+  gridEl.innerHTML = filtered.map(it => `
+    <div class="card">
+      <div>
+        <h3>${escapeHtml(it.name)}</h3>
+        <p>${it.hasIndex ? "Has index.html" : "No index.html — open folder to view"}</p>
+      </div>
+      <div>
+        <div class="meta">
+          <span class="chip">${it.hasIndex ? "Ready" : "Folder"}</span>
+        </div>
+        <div class="actions">
+          <a class="btn-open" href="https://${owner}.github.io/${repo}/${encodeURIComponent(it.name)}/" target="_blank" rel="noopener">Open</a>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+// small helper to avoid HTML injection
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+searchEl.addEventListener('input', () => buildIndex());
+refreshBtn.addEventListener('click', () => buildIndex());
+
+buildIndex();
+</script>
+</body>
+</html>
