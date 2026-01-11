@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Web Bookmark</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Permission -->
+    <div class="top-bar">
+        <button class="permission-btn" onclick="askPermission()">Permission</button>
+        <span id="editStatus" style="margin-left:12px;color:#ccc;font-weight:600">Edit: OFF</span>
+    </div>
+
+    <h1>Web Bookmark</h1>
+
+    <!-- Input Form -->
+    <div class="input-box">
+        <input id="nameInput" placeholder="Nama Web">
+        <input id="urlInput" placeholder="URL">
+        <input id="tagInput" placeholder="Kategori (pisahkan dengan koma)">
+        <button class="add-btn" onclick="addLink()">Tambah</button>
+    </div>
+
+    <input class="search-input" id="searchInput" oninput="renderLinks()" placeholder="Cari berdasarkan nama atau tag...">
+
+    <div class="filter-bar" id="filterBar"></div>
+
+    <div class="grid" id="grid"></div>
+
+</div>
+
+
+<script>
+// ======================
+// Supabase init
+// ======================
+const SUPABASE_URL = "https://blduskrepfscxpihuncz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Lil4dk5YgN8Xhh-7UTABGA_okW3jj3U";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let links = [];
+let activeTag = "All";
+let isEditor = false;
+
+// DOM references
+const nameInput = document.getElementById('nameInput');
+const urlInput = document.getElementById('urlInput');
+const tagInput = document.getElementById('tagInput');
+const searchInput = document.getElementById('searchInput');
+const filterBarEl = document.getElementById('filterBar');
+const gridEl = document.getElementById('grid');
+const permissionBtn = document.querySelector('.permission-btn');
+const editStatus = document.getElementById('editStatus');
+
+// ======================
+// Permission (password "bookmark")
+// ======================
+function askPermission() {
+    const pass = prompt("Masukkan password untuk edit:");
+
+    if (pass === "bookmark") {
+        isEditor = true;
+        permissionBtn.textContent = "Permission: ON";
+        editStatus.textContent = "Edit: ON";
+        editStatus.style.color = "#4ade80";
+        alert("Edit mode aktif.");
+        renderLinks();
+    } else {
+        alert("Password salah.");
+    }
+}
+
+// ======================
+// LOAD DATA
+// ======================
+async function loadLinks() {
+    const { data, error } = await supabaseClient
+        .from("bookmark")
+        .select("*")
+        .order("id", { ascending: false });
+
+    if (error) {
+        console.error(error);
+        alert("Gagal memuat data");
+        return;
+    }
+
+    links = data;
+    renderLinks();
+}
+
+// ======================
+// ADD LINK (INSERT)
+// ======================
+async function addLink() {
+    if (!isEditor) return alert("Harus masuk Permission dulu!");
+
+    const name = nameInput.value.trim();
+    const url = urlInput.value.trim();
+    const tags = tagInput.value
+        .split(",")
+        .map(t => t.trim())
+        .filter(t => t);
+
+    if (!name || !url)
+        return alert("Nama & URL wajib diisi!");
+
+    const { data, error } = await supabaseClient
+        .from("bookmark")
+        .insert([
+            {
+                name,
+                url,
+                tags,
+                secret: "bookmark"   // ⬅ WAJIB UNTUK RLS
+            }
+        ]);
+
+    if (error) {
+        console.error(error);
+        return alert("Gagal menyimpan: " + error.message);
+    }
+
+    nameInput.value = "";
+    urlInput.value = "";
+    tagInput.value = "";
+
+    loadLinks();
+}
+
+// ======================
+// DELETE (DELETE)
+// ======================
+async function deleteLink(id) {
+    if (!isEditor) return alert("Harus masuk Permission dulu!");
+
+    const { error } = await supabaseClient
+        .from("bookmark")
+        .delete()
+        .eq("id", id)
+        .eq("secret", "bookmark"); // ⬅ WAJIB UNTUK RLS
+
+    if (error) {
+        console.error(error);
+        return alert("Gagal menghapus: " + error.message);
+    }
+
+    loadLinks();
+}
+
+// ======================
+// GET TAGS
+// ======================
+function getAllTags() {
+    const set = new Set(["All"]);
+    links.forEach(l => {
+        if (Array.isArray(l.tags)) l.tags.forEach(t => set.add(t));
+    });
+    return [...set];
+}
+
+// ======================
+// RENDER FILTER BUTTONS
+// ======================
+function renderFilters() {
+    filterBarEl.innerHTML = "";
+    getAllTags().forEach(tag => {
+        const div = document.createElement("div");
+        div.className = "tag-filter" + (tag === activeTag ? " active" : "");
+        div.textContent = tag;
+        div.onclick = () => { activeTag = tag; renderLinks(); };
+        filterBarEl.appendChild(div);
+    });
+}
+
+// ======================
+// RENDER BOOKMARKS
+// ======================
+function renderLinks() {
+    renderFilters();
+    const search = searchInput.value.toLowerCase();
+    gridEl.innerHTML = "";
+
+    links
+        .filter(l =>
+            (activeTag === "All" || l.tags.includes(activeTag)) &&
+            (l.name.toLowerCase().includes(search) ||
+             l.tags.join(" ").toLowerCase().includes(search))
+        )
+        .forEach(l => {
+            const card = document.createElement("div");
+            card.className = "card";
+
+            card.innerHTML = `
+                <div class="card-title">${l.name}</div>
+                <div class="card-url">${l.url}</div>
+                <div class="tags">
+                    ${l.tags.map(t => `<span class='tag-filter small'>${t}</span>`).join("")}
+                </div>
+
+                <div class="card-buttons">
+                    <a class="open-btn" target="_blank" href="${l.url}">Open</a>
+                    ${isEditor ? `<button class="del-btn" onclick="deleteLink('${l.id}')">Delete</button>` : ""}
+                </div>
+            `;
+
+            gridEl.appendChild(card);
+        });
+}
+
+loadLinks();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Web Bookmark</title>
+<style>
+  :root{
+    --bg-overlay: rgba(10,25,47,0.85);
+    --panel-bg: rgba(17,34,64,0.9);
+    --glass: rgba(255,255,255,0.06);
+    --accent: #3b82f6;
+    --muted: #cbd5e1;
+    --card-radius: 16px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color:#f5f5f5;
+    /* background image (local path you uploaded) */
+    background: linear-gradient(var(--bg-overlay), var(--bg-overlay)),
+        url("https://th.bing.com/th/id/OIP.gM8pAqwLZTQ1VykZtyzlnAHaEK?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3")
+        no-repeat center center fixed;
+    background-size: cover;
+    -webkit-font-smoothing:antialiased;
+    padding:40px 24px;
+  }
+
+  .shell{
+    width:92%;
+    max-width:1200px;
+    margin: 0 auto;
+    background: var(--panel-bg);
+    border-radius:20px;
+    padding:28px 28px 40px 28px;
+    box-shadow:0 14px 50px rgba(2,6,23,0.6);
+    backdrop-filter: blur(6px);
+    position:relative;
+  }
+
+  h1{
+    text-align:center;
+    font-size:32px;
+    margin:8px 0 22px 0;
+    font-weight:700;
+    color:#fff;
+  }
+
+  /* permission button - top right */
+  .perm-btn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    display: inline-flex;
+    align-items:center;
+    gap:8px;
+    background: rgba(255,255,255,0.04);
+    padding:8px 12px;
+    border-radius:12px;
+    cursor:pointer;
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.02);
+    transition: all .12s;
+  }
+  .perm-btn:hover { transform: translateY(-2px); color:#fff; background: rgba(255,255,255,0.06); }
+
+  .perm-btn .lock {
+    width:18px; height:18px; display:inline-block;
+  }
+
+  /* input area */
+  .input-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-top:6px;
+    background: rgba(255,255,255,0.03);
+    padding:18px;
+    border-radius:18px;
+  }
+  .input-row input{
+    padding:14px 16px;
+    border-radius:12px;
+    border:none;
+    background: rgba(255,255,255,0.04);
+    color: #e6eef8;
+    outline:none;
+    font-size:14px;
+  }
+  .input-row input::placeholder{ color: rgba(235,240,250,0.35); }
+
+  .btn-add{
+    background: var(--accent);
+    color:white;
+    border:none;
+    padding:12px 18px;
+    border-radius:12px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn-add:hover{ background:#2563eb; }
+
+  .search {
+    margin-top:22px;
+    background: rgba(255,255,255,0.03);
+    padding:14px;
+    border-radius:14px;
+  }
+  .search input{
+    width:100%;
+    padding:12px 14px;
+    border-radius:10px;
+    border:none;
+    background: rgba(255,255,255,0.04);
+    color:#eaf2ff;
+  }
+
+  .filter-bar{
+    margin-top:18px;
+    display:flex;
+    gap:10px; flex-wrap:wrap;
+  }
+  .filter-chip{
+    background: rgba(255,255,255,0.04);
+    padding:8px 14px; border-radius:999px; cursor:pointer; color:var(--muted);
+  }
+  .filter-chip.active{ background: var(--accent); color:#fff; }
+
+  /* grid/list area */
+  .grid{
+    margin-top:26px;
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap:16px;
+  }
+
+  .card{
+    background: rgba(255,255,255,0.04);
+    padding:14px;
+    border-radius:14px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 26px rgba(0,0,0,0.45);
+    display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .card-title{ font-size:16px; font-weight:700; color:#fff; margin-bottom:6px; }
+  .card-url{ font-size:13px; color:var(--muted); word-break:break-all; }
+  .chips{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+  .chip{ background: rgba(59,130,246,0.18); color:#eaf2ff; padding:6px 10px; border-radius:999px; font-size:12px; }
+
+  .card-actions{ display:flex; justify-content:space-between; align-items:center; margin-top:12px; gap:8px; }
+  .open{ background:#2563eb; color:white; padding:8px 12px; border-radius:10px; text-decoration:none; font-weight:700; }
+  .del{ background:#ef4444; color:white; padding:8px 12px; border-radius:10px; border:none; cursor:pointer; }
+
+  /* modal */
+  .modal-backdrop{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,0.6); z-index:60; }
+  .modal{
+    background: rgba(17,24,39,0.98);
+    padding:20px; border-radius:12px; width:340px; color:#fff; box-shadow:0 12px 40px rgba(0,0,0,0.6);
+  }
+  .modal input{ width:100%; padding:10px 12px; border-radius:8px; border:none; margin-top:10px; background: rgba(255,255,255,0.04); color:#fff; }
+
+  @media (max-width:720px){
+    .input-row{ flex-direction:column; align-items:stretch; }
+    .perm-btn{ top:12px; right:12px; padding:6px 8px; }
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <div class="perm-btn" id="permBtn" title="Permission (admin)">
+      <svg class="lock" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 15a1 1 0 100-2 1 1 0 000 2z" fill="currentColor" opacity="0.9"/>
+        <path d="M7 10V8a5 5 0 1110 0v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="5" y="10" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.2" fill="none"/>
+      </svg>
+      <span id="permLabel">Locked</span>
+    </div>
+
+    <h1>Web Bookmark</h1>
+
+    <!-- input row -->
+    <div class="input-row" id="inputRow" style="display:none;">
+      <input id="nameInput" placeholder="Nama Web" />
+      <input id="urlInput" placeholder="URL (https://...)" />
+      <input id="tagInput" placeholder="Kategori (pisahkan dengan koma)" />
+      <button class="btn-add" id="addBtn">Tambah</button>
+    </div>
+
+    <div class="search">
+      <input id="searchInput" placeholder="Cari berdasarkan nama atau tag..." />
+    </div>
+
+    <div class="filter-bar" id="filterBar">
+      <div class="filter-chip active" data-tag="All">All</div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- permission modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Masukkan password</h3>
+      <input id="modalPass" type="password" placeholder="Password admin" />
+      <div style="display:flex; gap:10px; margin-top:12px; justify-content:flex-end;">
+        <button id="modalCancel" style="background:transparent;color:var(--muted);border:none;padding:8px 10px;border-radius:8px;cursor:pointer">Batal</button>
+        <button id="modalOk" style="background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer">Masuk</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase compat libs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+<script>
+/* ===================== CONFIG ===================== */
+/* GANTI dengan Firebase config web app mu */
+const firebaseConfig = {
+  apiKey: "REPLACE_APIKEY",
+  authDomain: "REPLACE_AUTH_DOMAIN",
+  projectId: "REPLACE_PROJECT_ID",
+  storageBucket: "REPLACE_STORAGE",
+  messagingSenderId: "REPLACE_MSG",
+  appId: "REPLACE_APPID"
+};
+/* Admin password (server rules should require secret === this for writes) */
+const ADMIN_PASSWORD = "bookmark";
+/* collection name */
+const COLLECTION = "bookmark";
+/* ================================================== */
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let isAdmin = false;
+const permBtn = document.getElementById('permBtn');
+const permLabel = document.getElementById('permLabel');
+const modal = document.getElementById('modal');
+const modalOk = document.getElementById('modalOk');
+const modalCancel = document.getElementById('modalCancel');
+const modalPass = document.getElementById('modalPass');
+const inputRow = document.getElementById('inputRow');
+const addBtn = document.getElementById('addBtn');
+const searchInput = document.getElementById('searchInput');
+const grid = document.getElementById('grid');
+const filterBar = document.getElementById('filterBar');
+
+function setAdmin(on){
+  isAdmin = !!on;
+  permLabel.textContent = isAdmin ? 'Admin' : 'Locked';
+  permBtn.style.color = isAdmin ? '#9ee7c6' : 'var(--muted)';
+  inputRow.style.display = isAdmin ? 'flex' : 'none';
+  // re-render so delete buttons appear/disappear
+  renderLinks();
+}
+
+/* modal handlers */
+permBtn.addEventListener('click', () => {
+  modal.style.display = 'flex';
+  modalPass.value = '';
+  modalPass.focus();
+});
+modalCancel.addEventListener('click', () => modal.style.display = 'none');
+modalOk.addEventListener('click', () => {
+  const v = modalPass.value.trim();
+  if(!v) return alert('Masukkan password');
+  // store in session (not persistent across tabs)
+  sessionStorage.setItem('bookmark_admin_pw', v);
+  // quick client-side check (server will still enforce secret)
+  if(v === ADMIN_PASSWORD){
+    setAdmin(true);
+    modal.style.display = 'none';
+  } else {
+    // still allow UI admin but server will reject if wrong secret
+    // to make UX friendly we allow client to try (it will fail on write)
+    setAdmin(true);
+    modal.style.display = 'none';
+    alert('Password tersimpan. Jika write gagal, cek password.');
+  }
+});
+
+/* helper: parse tags string => array */
+function parseTags(text){
+  if(!text) return [];
+  return text.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+}
+
+/* ============ FIRESTORE LISTEN/LOAD ============ */
+let links = []; // cached
+async function loadLinks(){
+  try{
+    const snap = await db.collection(COLLECTION).orderBy('created_at','desc').get();
+    links = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    renderFilters();
+    renderLinks();
+  }catch(e){
+    console.error(e);
+    grid.innerHTML = '<div style="grid-column:1/-1;color:#fca5a5">Gagal memuat data. Cek console.</div>';
+  }
+}
+
+/* realtime listener (optional) - you can switch to realtime onSnapshot if wanted */
+loadLinks();
+
+/* ============ ADD / DELETE (send secret field for Firestore rules) ============ */
+addBtn.addEventListener('click', async () => {
+  if(!isAdmin) return alert('Masuk mode admin dulu (Permission).');
+  const name = document.getElementById('nameInput').value.trim();
+  const url = document.getElementById('urlInput').value.trim();
+  const tags = parseTags(document.getElementById('tagInput').value);
+  if(!name || !url) return alert('Nama & URL wajib diisi!');
+  try{
+    await db.collection(COLLECTION).add({
+      name, url, tags, created_at: firebase.firestore.FieldValue.serverTimestamp(),
+      secret: sessionStorage.getItem('bookmark_admin_pw') || ''
+    });
+    document.getElementById('nameInput').value=''; document.getElementById('urlInput').value=''; document.getElementById('tagInput').value='';
+    await loadLinks();
+  }catch(err){
+    console.error(err);
+    alert('Gagal menambah. Pastikan password benar dan rules Firestore mengizinkan.');
+  }
+});
+
+async function deleteLink(id){
+  if(!isAdmin) return alert('Masuk mode admin dulu (Permission).');
+  if(!confirm('Hapus bookmark ini?')) return;
+  try{
+    // Because some security rules may require data on delete, write secret then delete
+    const pw = sessionStorage.getItem('bookmark_admin_pw') || '';
+    await db.collection(COLLECTION).doc(id).set({ secret: pw }, { merge:true });
+    await db.collection(COLLECTION).doc(id).delete();
+    await loadLinks();
+  }catch(err){
+    console.error(err);
+    alert('Gagal menghapus. Pastikan password benar dan rules Firestore mengizinkan.');
+  }
+}
+
+/* ============ FILTERS & RENDER ============ */
+let activeTag = 'All';
+
+function getAllTags(){
+  const s = new Set(['All']);
+  (links || []).forEach(l => {
+    (Array.isArray(l.tags) ? l.tags : []).forEach(t => s.add(t));
+  });
+  return Array.from(s);
+}
+
+function renderFilters(){
+  const tags = getAllTags();
+  filterBar.innerHTML = '';
+  tags.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'filter-chip' + (t === activeTag ? ' active' : '');
+    el.textContent = t;
+    el.dataset.tag = t;
+    el.onclick = () => { activeTag = t; renderLinks(); };
+    filterBar.appendChild(el);
+  });
+}
+
+function renderLinks(){
+  renderFilters();
+  const q = (searchInput.value || '').toLowerCase();
+  const out = [];
+  (links || []).forEach(l => {
+    const tagsArr = Array.isArray(l.tags) ? l.tags : [];
+    const inTag = (activeTag === 'All' || tagsArr.includes(activeTag));
+    const inSearch = l.name.toLowerCase().includes(q) || tagsArr.join(' ').includes(q);
+    if(inTag && inSearch) out.push(l);
+  });
+
+  if(out.length === 0){
+    grid.innerHTML = '<div style="grid-column:1/-1;color:var(--muted)">No bookmarks yet.</div>';
+    return;
+  }
+
+  grid.innerHTML = out.map(l => {
+    const tagsHtml = (Array.isArray(l.tags) ? l.tags : []).map(t => `<span class="chip">${escapeHtml(t)}</span>`).join('');
+    const delBtn = isAdmin ? `<button class="del" onclick="deleteLink('${l.id}')">Delete</button>` : '';
+    return `
+      <div class="card">
+        <div>
+          <div class="card-title">${escapeHtml(l.name || '')}</div>
+          <div class="card-url">${escapeHtml(l.url || '')}</div>
+          <div class="chips">${tagsHtml}</div>
+        </div>
+        <div class="card-actions">
+          <a class="open" href="${escapeHtml(l.url || '#')}" target="_blank" rel="noopener">Open</a>
+          ${delBtn}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* small helper */
+function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* search handler */
+searchInput.addEventListener('input', () => renderLinks());
+
+/* initialize admin if pw in session */
+if(sessionStorage.getItem('bookmark_admin_pw')){
+  // optional quick check: if known pw matches, set admin true
+  if(sessionStorage.getItem('bookmark_admin_pw') === ADMIN_PASSWORD){
+    setAdmin(true);
+  } else {
+    // still allow admin UI (user may have correct pw but different); actual writes validated by server rules
+    setAdmin(true);
+  }
+}
+
+/* allow pressing Enter in modal */
+modalPass.addEventListener('keyup', (e) => { if(e.key === 'Enter') modalOk.click(); });
+
+/* clicking outside modal closes it */
+document.getElementById('modal').addEventListener('click', (e) => {
+  if(e.target === document.getElementById('modal')) document.getElementById('modal').style.display = 'none';
+});
+
+/* export certain functions to window for inline handlers */
+window.deleteLink = deleteLink;
+
+/* initial render */
+loadLinks();
+</script>
+</body>
+</html>
