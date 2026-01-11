@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>EduKids Admin | Materi Edukasi</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+P+One&display=swap" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
+      crossorigin="anonymous"
+    />
+
+    <!-- OverlayScrollbars -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css"
+      crossorigin="anonymous"
+    />
+
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+      crossorigin="anonymous"
+    />
+
+    <!-- AdminLTE CSS -->
+    <link rel="stylesheet" href="css/adminlte.css" />
+
+    <style>
+      .brand-text {
+        font-family: 'Mochiy Pop P One', sans-serif;
+      }
+    </style>
+
+    <!-- Proteksi Dashboard -->
+    <script>
+      (function() {
+        const dashboardAuth = localStorage.getItem("edukids_dashboard_auth");
+        const currentUser = JSON.parse(localStorage.getItem("edukids_current_user"));
+
+        if (dashboardAuth !== "true" || !currentUser) {
+          alert("Akses ditolak! Silakan login terlebih dahulu.");
+          window.location.href = "../dashboard-login.html";
+        }
+
+        window.edukidsDashboardLogout = function() {
+          localStorage.removeItem("edukids_dashboard_auth");
+          window.location.href = "../home.html";
+        };
+      })();
+    </script>
+  </head>
+
+  <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <!-- App Wrapper -->
+    <div class="app-wrapper">
+
+      <!-- Header -->
+      <nav class="app-header navbar navbar-expand bg-body">
+        <div class="container-fluid">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+                <i class="bi bi-list"></i>
+              </a>
+            </li>
+            <li class="nav-item d-none d-md-block">
+              <a href="../home.html" class="nav-link">Lihat Website</a>
+            </li>
+          </ul>
+
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item dropdown user-menu">
+              <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                <span class="d-none d-md-inline">Admin EduKids</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                <li class="user-header text-bg-primary">
+                  <p>Admin EduKids <small>Administrator</small></p>
+                </li>
+                <li class="user-footer">
+                  <a href="#" class="btn btn-default btn-flat">Profil</a>
+                  <a href="#" class="btn btn-default btn-flat float-end" onclick="edukidsDashboardLogout(); return false;">Logout</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Sidebar -->
+      <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+        <div class="sidebar-brand">
+          <a href="index.html" class="brand-link">
+            <span class="brand-text fw-light">🎓 EduKids Admin</span>
+          </a>
+        </div>
+
+        <div class="sidebar-wrapper">
+          <nav class="mt-2">
+            <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
+              <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                  <i class="nav-icon bi bi-speedometer"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+
+              <li class="nav-item menu-open">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-gear-fill"></i>
+                  <p>
+                    Manajemen
+                    <i class="nav-arrow bi bi-chevron-right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="materi.html" class="nav-link active">
+                      <i class="nav-icon bi bi-book"></i>
+                      <p>Materi Edukasi</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="wahana.html" class="nav-link">
+                      <i class="nav-icon bi bi-palette"></i>
+                      <p>Wahana</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="reservasi.html" class="nav-link">
+                      <i class="nav-icon bi bi-calendar-check"></i>
+                      <p>Reservasi</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <li class="nav-item">
+                <a href="users.html" class="nav-link">
+                  <i class="nav-icon bi bi-people-fill"></i>
+                  <p>Pengguna</p>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- App Main -->
+      <main class="app-main">
+        <div class="app-content-header">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-sm-6">
+                <h3 class="mb-0">Materi Edukasi</h3>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end">
+                  <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                  <li class="breadcrumb-item active">Materi</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="app-content">
+          <div class="container-fluid">
+
+            <!-- Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Daftar Materi Edukasi</h3>
+              </div>
+              <div class="card-body p-0">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th style="width: 10px">#</th>
+                      <th>Judul Materi</th>
+                      <th>Kategori</th>
+                      <th>Tanggal Dibuat</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1</td>
+                      <td>Teknik Dasar Memanah untuk Anak</td>
+                      <td><span class="badge text-bg-primary">🏹 Memanah</span></td>
+                      <td>01 Jan 2026</td>
+                    </tr>
+                    <tr>
+                      <td>2</td>
+                      <td>Keselamatan Berkuda</td>
+                      <td><span class="badge text-bg-success">🐴 Berkuda</span></td>
+                      <td>02 Jan 2026</td>
+                    </tr>
+                    <tr>
+                      <td>3</td>
+                      <td>Mengenal Warna dan Bentuk</td>
+                      <td><span class="badge text-bg-warning">🎨 Seni dan Kreativitas</span></td>
+                      <td>03 Jan 2026</td>
+                    </tr>
+                    <tr>
+                      <td>4</td>
+                      <td>Fokus dan Konsentrasi dalam Memanah</td>
+                      <td><span class="badge text-bg-primary">🏹 Memanah</span></td>
+                      <td>04 Jan 2026</td>
+                    </tr>
+                    <tr>
+                      <td>5</td>
+                      <td>Cara Merawat dan Menyayangi Kuda</td>
+                      <td><span class="badge text-bg-success">🐴 Berkuda</span></td>
+                      <td>05 Jan 2026</td>
+                    </tr>
+                    <tr>
+                      <td>6</td>
+                      <td>Kreativitas Melukis dengan Cat Air</td>
+                      <td><span class="badge text-bg-warning">🎨 Seni dan Kreativitas</span></td>
+                      <td>06 Jan 2026</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="card-footer clearfix">
+                <span class="text-muted">Menampilkan 6 materi</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="app-footer">
+        <div class="float-end d-none d-sm-inline">EduKids Admin Panel</div>
+        <strong>
+          &copy; 2026 <a href="../home.html" class="text-decoration-none">EduKids</a>.
+        </strong>
+        All rights reserved.
+      </footer>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script src="js/adminlte.js"></script>
+
+    <script>
+      const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+      const Default = {
+        scrollbarTheme: 'os-theme-light',
+        scrollbarAutoHide: 'leave',
+        scrollbarClickScroll: true,
+      };
+      document.addEventListener('DOMContentLoaded', function () {
+        const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+        if (sidebarWrapper && typeof OverlayScrollbarsGlobal?.OverlayScrollbars !== 'undefined') {
+          OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+            scrollbars: {
+              theme: Default.scrollbarTheme,
+              autoHide: Default.scrollbarAutoHide,
+              clickScroll: Default.scrollbarClickScroll,
+            },
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

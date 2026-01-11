@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduKids</title>
+
+  <!-- GOOGLE FONT -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+P+One&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/auth.js"></script>
+
+  <style>
+    body {
+      font-family: 'Mochiy Pop P One', sans-serif;
+    }
+
+    a, button {
+      cursor: pointer;
+    }
+  </style>
+
+  <script>
+    function scrollToSection(id) {
+      const target = document.getElementById(id);
+      window.scrollTo({
+        top: target.offsetTop - 80,
+        behavior: "smooth"
+      });
+      closeMenu();
+    }
+
+    function toggleMenu() {
+      document.getElementById("mobileMenu").classList.toggle("hidden");
+    }
+
+    function closeMenu() {
+      document.getElementById("mobileMenu").classList.add("hidden");
+    }
+
+    // Cek status login dan update navbar
+    function updateNavbar() {
+      const currentUser = JSON.parse(localStorage.getItem("edukids_current_user"));
+      const authButtons = document.getElementById("authButtons");
+      const authButtonsMobile = document.getElementById("authButtonsMobile");
+
+      if (currentUser) {
+        // Tombol dashboard untuk semua user yang sudah login
+        const dashboardBtn = `<a href="dashboard-login.html" class="bg-purple-500 text-white px-3 py-1.5 rounded-full text-sm hover:bg-purple-600 transition">Dashboard</a>`;
+        const dashboardBtnMobile = `<a href="dashboard-login.html" class="bg-purple-500 text-white py-2.5 px-4 rounded-lg text-center font-medium block hover:bg-purple-600 transition">Dashboard</a>`;
+
+        // User sudah login - tampilkan nama dan tombol admin/logout
+        authButtons.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="bg-green-500 text-white px-3 py-1.5 rounded-full text-sm flex items-center gap-1">
+              <span>👤</span>
+              <span class="max-w-[100px] truncate">${currentUser.nama}</span>
+            </span>
+            ${dashboardBtn}
+            <a onclick="logout()" class="bg-red-500 text-white px-3 py-1.5 rounded-full text-sm hover:bg-red-600 transition cursor-pointer">Logout</a>
+          </div>
+        `;
+
+        authButtonsMobile.innerHTML = `
+          <div class="bg-green-500 text-white py-2.5 px-4 rounded-lg text-center font-medium flex items-center justify-center gap-2">
+            <span>👤</span>
+            <span class="truncate">${currentUser.nama}</span>
+          </div>
+          ${dashboardBtnMobile}
+          <a onclick="logout()" class="bg-red-500 text-white py-2.5 px-4 rounded-lg text-center font-medium block hover:bg-red-600 transition cursor-pointer">Logout</a>
+        `;
+      } else {
+        // User belum login - tampilkan tombol login/register
+        authButtons.innerHTML = `
+          <a href="login.html" class="bg-white text-blue-500 px-4 py-1.5 rounded-full text-sm font-medium hover:bg-gray-100 transition">Login</a>
+          <a href="register.html" class="bg-yellow-300 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium hover:bg-yellow-400 transition">Register</a>
+        `;
+
+        authButtonsMobile.innerHTML = `
+          <a href="login.html" class="bg-white text-blue-500 py-2.5 px-4 rounded-lg text-center font-medium block">Login</a>
+          <a href="register.html" class="bg-yellow-300 text-blue-700 py-2.5 px-4 rounded-lg text-center font-medium block">Register</a>
+        `;
+      }
+    }
+
+    // Jalankan saat halaman dimuat
+    document.addEventListener("DOMContentLoaded", updateNavbar);
+  </script>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="bg-blue-500 text-white fixed w-full z-50 shadow-lg">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex justify-between items-center h-16">
+
+      <!-- Logo -->
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <img src="img/log0.jpeg" class="h-10 w-10 rounded-full object-cover">
+        <h1 class="font-bold text-lg">EduKids</h1>
+      </div>
+
+      <!-- Desktop Menu -->
+      <ul class="hidden lg:flex items-center gap-4 xl:gap-6">
+        <li><a onclick="scrollToSection('beranda')" class="hover:text-yellow-300 transition">Beranda</a></li>
+        <li><a onclick="scrollToSection('wahana')" class="hover:text-yellow-300 transition">Wahana</a></li>
+        <li><a onclick="scrollToSection('booking')" class="hover:text-yellow-300 transition">Reservasi</a></li>
+        <li><a onclick="scrollToSection('tentang')" class="hover:text-yellow-300 transition">Tentang</a></li>
+        <li><a onclick="scrollToSection('kontak')" class="hover:text-yellow-300 transition">Kontak</a></li>
+      </ul>
+
+      <!-- Auth Buttons Desktop -->
+      <div id="authButtons" class="hidden lg:flex items-center gap-2">
+        <a href="login.html" class="bg-white text-blue-500 px-4 py-1.5 rounded-full text-sm font-medium hover:bg-gray-100 transition">Login</a>
+        <a href="register.html" class="bg-yellow-300 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium hover:bg-yellow-400 transition">Register</a>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button class="lg:hidden text-2xl p-2" onclick="toggleMenu()">
+        <span id="menuIcon">☰</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MOBILE MENU -->
+  <div id="mobileMenu" class="hidden lg:hidden bg-blue-600 border-t border-blue-400">
+    <div class="px-4 py-4 space-y-3">
+      <!-- Nav Links -->
+      <a onclick="scrollToSection('beranda')" class="block py-2 px-4 rounded hover:bg-blue-500 transition">Beranda</a>
+      <a onclick="scrollToSection('wahana')" class="block py-2 px-4 rounded hover:bg-blue-500 transition">Wahana</a>
+      <a onclick="scrollToSection('booking')" class="block py-2 px-4 rounded hover:bg-blue-500 transition">Reservasi</a>
+      <a onclick="scrollToSection('tentang')" class="block py-2 px-4 rounded hover:bg-blue-500 transition">Tentang Kami</a>
+      <a onclick="scrollToSection('kontak')" class="block py-2 px-4 rounded hover:bg-blue-500 transition">Kontak</a>
+
+      <!-- Auth Buttons Mobile -->
+      <div class="border-t border-blue-400 pt-4 mt-4">
+        <div id="authButtonsMobile" class="flex flex-col gap-2">
+          <a href="login.html" class="bg-white text-blue-500 py-2.5 px-4 rounded-lg text-center font-medium">Login</a>
+          <a href="register.html" class="bg-yellow-300 text-blue-700 py-2.5 px-4 rounded-lg text-center font-medium">Register</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- BERANDA -->
+<section id="beranda" class="min-h-screen bg-cover bg-center"
+style="background-image:url('./img/bg1.avif')">
+  <div class="bg-black/50 w-full min-h-screen flex items-center">
+    <div class="max-w-6xl mx-auto text-center text-white pt-24 px-4">
+      <h2 class="text-3xl md:text-5xl font-bold mb-4">
+        Selamat Datang di EduKids
+      </h2>
+      <p class="text-base md:text-lg mb-6">
+        Tempat belajar anak yang seru dan menyenangkan
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+        <a onclick="scrollToSection('booking')"
+           class="inline-flex items-center justify-center bg-blue-500 px-8 py-3.5 md:py-4 rounded-xl shadow-md hover:bg-blue-600 transition text-base md:text-lg">
+          Reservasi Sekarang
+        </a>
+        <a onclick="scrollToSection('kontak')"
+           class="inline-flex items-center justify-center bg-yellow-300 text-blue-800 px-8 py-3.5 md:py-4 rounded-xl shadow-md hover:bg-yellow-400 transition text-base md:text-lg">
+          Hubungi Kami
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WAHANA -->
+<section
+  id="wahana"
+  class="py-24 bg-cover bg-center"
+  style="background-image:url('img/bg4.webp')"
+>
+  <div class="bg-black/40">
+    <div class="max-w-6xl mx-auto px-4 py-24">
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-10 text-white">
+        Wahana Edukasi
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+      <!-- CARD -->
+      <div class="bg-white/95 backdrop-blur rounded-xl shadow hover:shadow-lg transition">
+        <img src="img/memanah.jpeg" class="w-full h-56 object-cover rounded-t-xl">
+        <div class="p-6">
+          <h3 class="text-xl font-bold text-center mb-3">Memanah</h3>
+          <p class="text-gray-700 text-justify text-sm md:text-base">
+            Latihan memanah adalah olahraga yang melatih fokus, ketenangan,
+            dan kepercayaan diri.
+          </p>
+        </div>
+      </div>
+
+      <div class="bg-white/95 backdrop-blur rounded-xl shadow hover:shadow-lg transition">
+        <img src="img/berkuda.jpg" class="w-full h-56 object-cover rounded-t-xl">
+        <div class="p-6">
+          <h3 class="text-xl font-bold text-center mb-3">Berkuda</h3>
+          <p class="text-gray-700 text-justify text-sm md:text-base">
+            Melatih keseimbangan, keberanian, dan kedisiplinan anak.
+          </p>
+        </div>
+      </div>
+
+      <div class="bg-white/95 backdrop-blur rounded-xl shadow hover:shadow-lg transition">
+        <img src="img/seni.jpeg" class="w-full h-56 object-cover rounded-t-xl">
+        <div class="p-6">
+          <h3 class="text-xl font-bold text-center mb-3">Seni & Kreativitas</h3>
+          <p class="text-gray-700 text-justify text-sm md:text-base">
+            Mengembangkan imajinasi dan kreativitas anak.
+          </p>
+        </div>
+      </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESERVASI -->
+<section
+  id="booking"
+  class="min-h-screen bg-cover bg-center flex items-center py-24"
+  style="background-image:url('img/bg4.webp')"
+>
+  <div class="bg-black/40 w-full py-24">
+    <div class="max-w-md mx-auto bg-white/95 backdrop-blur p-6 rounded-2xl shadow w-full mx-4">
+      <h2 class="text-2xl md:text-3xl font-bold text-center mb-4">Reservasi Kunjungan</h2>
+      <input id="bookingNama" type="text" placeholder="Nama Anak" class="border p-3 w-full mb-3 rounded">
+      <select id="bookingWahana" class="border p-3 w-full mb-3 rounded">
+        <option>Memanah</option>
+        <option>Berkuda</option>
+        <option>Seni dan Kreativitas</option>
+      </select>
+      <input id="bookingTanggal" type="date" class="border p-3 w-full mb-4 rounded">
+      <button onclick="submitBooking()"
+        class="bg-blue-500 text-white w-full py-4 rounded-xl text-base md:text-lg font-semibold hover:bg-blue-600 transition">
+        Kirim Reservasi
+      </button>
+    </div>
+  </div>
+</section>
+
+<script src="js/reservasi.js"></script>
+<script>
+  function submitBooking() {
+    const nama = document.getElementById('bookingNama').value.trim();
+    const wahana = document.getElementById('bookingWahana').value;
+    const tanggal = document.getElementById('bookingTanggal').value;
+
+    // Validasi
+    if (!nama) {
+      alert('Mohon isi nama anak!');
+      return;
+    }
+    if (!tanggal) {
+      alert('Mohon pilih tanggal reservasi!');
+      return;
+    }
+
+    // Simpan ke localStorage
+    saveBooking(nama, wahana, tanggal);
+
+    // Reset form
+    document.getElementById('bookingNama').value = '';
+    document.getElementById('bookingTanggal').value = '';
+
+    alert('Reservasi berhasil! 🎉\nNama: ' + nama + '\nWahana: ' + wahana + '\nTanggal: ' + tanggal);
+
+    // Redirect ke beranda
+    scrollToSection('beranda');
+  }
+</script>
+
+<!-- TENTANG -->
+<section
+  id="tentang"
+  class="min-h-screen bg-yellow-100 flex items-center
+         bg-cover bg-center bg-no-repeat py-24"
+  style="background-image:url('img/bg2.jpg')"
+>
+  <div class="bg-black/50 w-full min-h-screen flex items-center">
+    <div class="max-w-5xl mx-auto text-center px-4 text-white">
+
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">
+        Tentang Kami
+      </h2>
+
+      <p class="text-base md:text-lg leading-relaxed">
+        <strong>EduKids</strong> adalah platform edukasi anak berbasis wahana interaktif
+        yang dirancang untuk membantu anak belajar sambil bermain.
+      </p>
+
+      <p class="text-base md:text-lg mt-4 leading-relaxed">
+        Melalui wahana seperti <strong>memanah</strong>,
+        <strong>berkuda</strong>, serta <strong>seni dan kreativitas</strong>,
+        kami membantu melatih fokus, keberanian, kreativitas, dan
+        kepercayaan diri anak.
+      </p>
+
+      <p class="text-base md:text-lg mt-4 leading-relaxed">
+        EduKids berkomitmen menciptakan lingkungan belajar yang aman,
+        ramah anak, dan menyenangkan.
+      </p>
+
+      <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 text-black">
+        <div class="bg-white p-6 rounded-xl shadow">
+          <h3 class="font-bold text-xl mb-2">Visi Kami</h3>
+          <p>
+            Menjadi wahana edukasi anak yang menyenangkan dan terpercaya.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow">
+          <h3 class="font-bold text-xl mb-2">Misi Kami</h3>
+          <ul class="list-disc list-inside">
+            <li>Edukasi berbasis aktivitas</li>
+            <li>Keamanan & kenyamanan anak</li>
+            <li>Mendorong kreativitas</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <span class="bg-blue-500 px-4 py-2 rounded-full">Aman</span>
+        <span class="bg-green-500 px-4 py-2 rounded-full">Edukatif</span>
+        <span class="bg-yellow-400 text-black px-4 py-2 rounded-full">Menyenangkan</span>
+        <span class="bg-purple-500 px-4 py-2 rounded-full">Ramah Anak</span>
+      </div>
+
+      <!-- Tim Kami -->
+      <div class="mt-12">
+        <h3 class="text-2xl md:text-3xl font-bold mb-8">Tim Kami</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+
+          <!-- Person 1 -->
+          <div class="bg-white/90 backdrop-blur rounded-xl p-4 text-black shadow-lg hover:scale-105 transition-transform">
+            <img src="img/rafan.jpeg" alt="Team Member 1"
+              class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover border-4 border-blue-500 mb-3">
+            <h4 class="font-bold text-sm md:text-base">Rafan</h4>
+            <p class="text-xs md:text-sm text-gray-600">Ketua</p>
+          </div>
+
+          <!-- Person 2 -->
+          <div class="bg-white/90 backdrop-blur rounded-xl p-4 text-black shadow-lg hover:scale-105 transition-transform">
+            <img src="img/andre.jpeg" alt="Team Member 2"
+              class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover border-4 border-green-500 mb-3">
+            <h4 class="font-bold text-sm md:text-base">Andrean</h4>
+            <p class="text-xs md:text-sm text-gray-600">Anggota 1</p>
+          </div>
+
+          <!-- Person 3 -->
+          <div class="bg-white/90 backdrop-blur rounded-xl p-4 text-black shadow-lg hover:scale-105 transition-transform">
+            <img src="img/labibah.jpeg" alt="Team Member 3"
+              class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover border-4 border-yellow-500 mb-3">
+            <h4 class="font-bold text-sm md:text-base">Labibah</h4>
+            <p class="text-xs md:text-sm text-gray-600">Anggota 2</p>
+          </div>
+
+          <!-- Person 4 -->
+          <div class="bg-white/90 backdrop-blur rounded-xl p-4 text-black shadow-lg hover:scale-105 transition-transform">
+            <img src="img/nurul.jpeg" alt="Team Member 4"
+              class="w-20 h-20 md:w-24 md:h-24 mx-auto rounded-full object-cover border-4 border-purple-500 mb-3">
+            <h4 class="font-bold text-sm md:text-base">Nurul</h4>
+            <p class="text-xs md:text-sm text-gray-600">Anggota 3</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- KONTAK -->
+<section id="kontak" class="min-h-screen bg-pink-100 flex items-center py-24">
+  <div class="max-w-xl mx-auto text-center px-4">
+    <h2 class="text-3xl md:text-5xl font-bold mb-6">Hubungi Kami</h2>
+
+    <div class="bg-white p-8 rounded-2xl shadow text-left">
+      <p class="mb-3">📧 <strong>Email:</strong> edukids@gmail.com</p>
+      <p class="mb-3">📞 <strong>Telp:</strong> 085777854441</p>
+      <p>📍 <strong>Alamat:</strong> Jalan Margonda</p>
+
+      <div class="mt-6 flex flex-col sm:flex-row gap-3">
+        <a
+          href="https://wa.me/6285777854441"
+          target="_blank"
+          rel="noopener"
+          class="bg-green-500 text-white px-8 py-4 rounded-xl text-base md:text-lg font-semibold text-center hover:bg-green-600 transition"
+        >
+          WhatsApp Admin
+        </a>
+        <a
+          href="mailto:edukids@gmail.com"
+          class="bg-blue-500 text-white px-8 py-4 rounded-xl text-base md:text-lg font-semibold text-center hover:bg-blue-600 transition"
+        >
+          Kirim Email
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-blue-500 text-white text-center p-4">
+  © 2026 EduKids
+</footer>
+
+</body>
+</html>
